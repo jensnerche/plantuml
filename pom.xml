@@ -218,10 +218,56 @@
                                         </goals>
                                         <configuration>
                                                 <failOnViolations>true</failOnViolations>
+                                                <scanProperties>
+                                                        <jqassistant.plugin.jacoco.filename>jacoco.xml</jqassistant.plugin.jacoco.filename>
+                                                </scanProperties>
+                                                <scanIncludes>
+                                                        <scanInclude>
+                                                                <path>target/site/jacoco</path>
+                                                        </scanInclude>
+                                                </scanIncludes>
+                                        </configuration>
+                                </execution>
+                        </executions>
+                        <dependencies>
+                                <dependency>
+                                        <groupId>de.kontext-e.jqassistant.plugin</groupId>
+                                        <artifactId>jqassistant.plugin.jacoco</artifactId>
+                                        <version>1.0.0</version>
+                                </dependency>
+                        </dependencies>
+                </plugin>
+                <plugin>
+                        <groupId>org.jacoco</groupId>
+                        <artifactId>jacoco-maven-plugin</artifactId>
+                        <version>0.7.5.201505241946</version>
+                        <executions>
+                                <execution>
+                                        <id>default-prepare-agent</id>
+                                        <goals>
+                                                <goal>prepare-agent</goal>
+                                        </goals>
+                                </execution>
+                                <execution>
+                                        <id>default-report</id>
+                                        <phase>prepare-package</phase>
+                                        <goals>
+                                                <goal>report</goal>
+                                        </goals>
+                                </execution>
+                                <execution>
+                                        <id>default-check</id>
+                                        <goals>
+                                                <goal>check</goal>
+                                        </goals>
+                                        <configuration>
+                                                <rules>
+                                                </rules>
                                         </configuration>
                                 </execution>
                         </executions>
                 </plugin>
+
         </plugins>
     </build>
 

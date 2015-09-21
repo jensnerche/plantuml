@@ -13,8 +13,50 @@
         ]]></cypher>
     </constraint>
 
+    <constraint id="test:TestCoverageForLowComplexity">
+        <description>...</description>
+        <cypher><![CDATA[
+        match (cl:JacocoClass)--(m:JacocoMethod)--(c:JacocoCounter {type: 'COMPLEXITY'})
+        where c.missed+c.covered >= 2 and c.missed+c.covered <= 3 and not(m.signature ='boolean equals(java.lang.Object)') and not(m.signature ='int hashCode()')
+        with m as method, cl.fqn as fqn, m.signature as signature, c.missed+c.covered as complexity
+        match (m)--(branches:JacocoCounter {type: 'BRANCH'})
+        where m=method and branches.covered*100/(branches.covered+branches.missed) < 0
+        return fqn, signature, complexity, branches.covered*100/(branches.covered+branches.missed) as coverage
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="test:TestCoverageForMediumComplexity">
+        <description>...</description>
+        <cypher><![CDATA[
+        match (cl:JacocoClass)--(m:JacocoMethod)--(c:JacocoCounter {type: 'COMPLEXITY'})
+        where c.missed+c.covered >= 4 and c.missed+c.covered <= 5 and not(m.signature ='boolean equals(java.lang.Object)') and not(m.signature ='int hashCode()')
+        with m as method, cl.fqn as fqn, m.signature as signature, c.missed+c.covered as complexity
+        match (m)--(branches:JacocoCounter {type: 'BRANCH'})
+        where m=method and branches.covered*100/(branches.covered+branches.missed) < 80
+        return fqn, signature, complexity, branches.covered*100/(branches.covered+branches.missed) as coverage
+        ]]></cypher>
+    </constraint>
+
+    <constraint id="test:TestCoverageForHighComplexity">
+        <description>...</description>
+        <cypher><![CDATA[
+        MATCH (cl:JacocoClass)--(m:JacocoMethod)--(c:JacocoCounter {type: 'COMPLEXITY'})
+        WHERE c.missed+c.covered > 50 AND NOT(m.signature ='boolean equals(java.lang.Object)') AND NOT(m.signature ='int hashCode()')
+        WITH m AS method, cl.fqn AS fqn, m.signature AS signature, c.missed+c.covered AS complexity
+        MATCH (m)--(branches:JacocoCounter {type: 'BRANCH'})
+        WHERE m=method AND branches.covered*100/(branches.covered+branches.missed) < 90
+        RETURN fqn, signature, complexity, branches.covered*100/(branches.covered+branches.missed) AS coverage
+        ]]></cypher>
+    </constraint>
+
+
     <group id="default">
         <includeConstraint refId="my-rules:TestClassName" />
+<!--
+        <includeConstraint refId="test:TestCoverageForLowComplexity" />
+        <includeConstraint refId="test:TestCoverageForMediumComplexity" />
+-->
+        <includeConstraint refId="test:TestCoverageForHighComplexity" />
     </group>
 
 </jqa:jqassistant-rules>
