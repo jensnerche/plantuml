@@ -1,2 +1,3 @@
 # plantuml
-Copy of the official plantuml source
+Copy of the official [PlantUML source](http://sourceforge.net/projects/plantuml/).
+
