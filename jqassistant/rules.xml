@@ -49,14 +49,55 @@
         ]]></cypher>
     </constraint>
 
+    <concept id="jacoco:TestCoverageMediumRange">
+        <description>Define ranges for test coverage.</description>
+        <cypher><![CDATA[
+        CREATE
+            (n:TestCoverageRange {min : 40, max : 49, coverage : 80 })
+        RETURN
+            n
+    ]]></cypher>
+    </concept>
+
+    <concept id="jacoco:TestCoverageHighRange">
+        <description>Define ranges for test coverage.</description>
+        <cypher><![CDATA[
+        CREATE
+            (n:TestCoverageRange { min : 50, max : 999999, coverage : 90 })
+        RETURN
+            n
+    ]]></cypher>
+    </concept>
+
+
+    <constraint id="test:TestCoverageForConfiguredComplexity">
+        <requiresConcept refId="jacoco:TestCoverageMediumRange"/>
+        <requiresConcept refId="jacoco:TestCoverageHighRange"/>
+        <description>...</description>
+        <cypher><![CDATA[
+        MATCH (tcr:TestCoverageRange)
+        WITH tcr.min AS mincomplexity, tcr.max as maxcomplexity, tcr.coverage AS coveragethreshold
+        MATCH (cl:JacocoClass)--(m:JacocoMethod)--(c:JacocoCounter {type: 'COMPLEXITY'})
+        WHERE c.missed+c.covered >= mincomplexity AND c.missed+c.covered <= maxcomplexity
+        AND NOT(m.signature ='boolean equals(java.lang.Object)') AND NOT(m.signature ='int hashCode()')
+        AND NOT(cl.fqn =~ 'net.sourceforge.plantuml.sudoku.dlx_solver.*')
+        WITH m AS method, cl.fqn AS fqn, m.signature AS signature, c.missed+c.covered AS complexity, coveragethreshold as coveragethreshold
+        MATCH (m)--(branches:JacocoCounter {type: 'BRANCH'})
+        WHERE m=method AND branches.covered*100/(branches.covered+branches.missed) < coveragethreshold
+        RETURN complexity, coveragethreshold, branches.covered*100/(branches.covered+branches.missed) AS coverage, fqn, signature
+        ORDER BY complexity, coverage
+        ]]></cypher>
+    </constraint>
+
 
     <group id="default">
         <includeConstraint refId="my-rules:TestClassName" />
 <!--
         <includeConstraint refId="test:TestCoverageForLowComplexity" />
         <includeConstraint refId="test:TestCoverageForMediumComplexity" />
--->
         <includeConstraint refId="test:TestCoverageForHighComplexity" />
+-->
+        <includeConstraint refId="test:TestCoverageForConfiguredComplexity" />
     </group>
 
 </jqa:jqassistant-rules>
